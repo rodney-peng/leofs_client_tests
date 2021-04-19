@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding: utf8
 
 import traceback
@@ -29,6 +29,7 @@ MetadataKey = "cmeta_key"
 MetadataVal = "cmeta_val"
 MetadataMap = {MetadataKey : MetadataVal}
 
+boto3cli = None
 tester = None
 
 def main():
@@ -46,6 +47,12 @@ def main():
     try:
         init(SignVer, Host, Port, AccessKeyId, SecretAccessKey)
         tester.createBucket(Bucket)
+    except boto3cli.s3.exceptions.BucketAlreadyExists as exist:
+        print('BucketAlreadyExists:', exist)
+    except boto3cli.s3.exceptions.BucketAlreadyOwnedByYou as owned:
+        print('BucketAlreadyOwnedByYou:', owned)
+
+    try:
 
         # Put Object Test
         tester.putObject(Bucket, "test.simple",    SmallTestF)
@@ -115,13 +122,19 @@ def main():
         tester.setBucketAcl(Bucket, "public-read")
         tester.setBucketAcl(Bucket, "public-read-write")
 
-    except Exception, e:
-        print traceback.format_exc()
+        tester.deleteBucket(Bucket)
+
+    except Exception as e:
+        print(traceback.format_exc())
         sys.exit(-1)
 
 def init(signVer, Host, Port, AccessKeyId, SecretAccessKey):
+    global boto3cli
     global tester
     boto3cli = Boto3Client(signVer, Host, Port, AccessKeyId, SecretAccessKey)
     tester = LeoFSTester(boto3cli)
+#    print('s3=', dir(boto3cli.s3))
+#    print('s3.meta=', dir(boto3cli.s3.meta))
+    print('s3.exceptions=', dir(boto3cli.s3.exceptions))
 
 main()

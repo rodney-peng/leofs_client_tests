@@ -34,6 +34,9 @@ class Boto3Client:
     def do_create_bucket(self, bucket_name):
         self.s3.create_bucket(Bucket=bucket_name)
 
+    def do_delete_bucket(self, bucket_name):
+        self.s3.delete_bucket(Bucket=bucket_name)
+
     def do_put_object(self, key, path, meta_map=None, bucket_name=None):
         GB = 1024 ** 3
         # Ensure that multipart uploads only happen if the size of a transfer
